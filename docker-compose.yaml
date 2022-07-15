@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+
+  nodeserver:
+    build:
+      context: ./node
+      dockerfile: Dockerfile.prod
+    container_name: app
+    image: ansilva/node-desafiofc:prod
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s node index.js
+    tty: true
+    volumes: 
+      - ./node:/usr/src/app
+    environment:
+      - DOCKERIZE_VERSION=v0.6.1
+    networks: 
+      - desafio-network
+    depends_on: 
+      - db
+
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    container_name: nginx
+    image: ansilva/nginx-desafiofc:prod
+    tty: true
+    ports:
+      - "8080:80"
+    networks: 
+      - desafio-network
+
+  db:
+    image: mysql:5.7
+    user: mysql
+    command: --innodb-use-native-aio=0
+    container_name: db
+    restart: always
+    tty: true
+    volumes:
+      - ./mysql:/var/lib/mysql 
+    environment: 
+      - MYSQL_DATABASE=nodedb 
+      - MYSQL_ROOT_PASSWORD=root
+    networks: 
+      - desafio-network  
+
+networks: 
+  desafio-network:
+    driver: bridge  
+
+
+  
