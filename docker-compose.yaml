@@ -12,11 +12,12 @@ services:
     tty: true
     volumes: 
       - ./node:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
       - DOCKERIZE_VERSION=v0.6.1
     networks: 
       - desafio-network
-    depends_on: 
+    depends_on:
       - db
 
   nginx:
@@ -34,13 +35,13 @@ services:
 
   db:
     image: mysql:5.7
-    user: mysql
     command: --innodb-use-native-aio=0
     container_name: db
     restart: always
     tty: true
     volumes:
       - ./mysql:/var/lib/mysql 
+      - ./db:/docker-entrypoint-initdb.d
     environment: 
       - MYSQL_DATABASE=nodedb 
       - MYSQL_ROOT_PASSWORD=root
